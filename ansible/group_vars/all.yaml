@@ -135,6 +135,8 @@ cloud_config: "{% if cloud_config_local is defined and cloud_config_local != '' 
 kubernetes_certificates_dir: "{{ kubernetes_install_dir }}/pki" 
 kubernetes_certificates:
   ca: "{{ kubernetes_certificates_dir }}/ca.pem"
+  admin: "{{ kubernetes_certificates_dir }}/admin.pem"
+  admin_key: "{{ kubernetes_certificates_dir }}/admin-key.pem"
   api_server: "{{ kubernetes_certificates_dir }}/api-server.pem"
   api_server_key: "{{ kubernetes_certificates_dir }}/api-server-key.pem"
   etcd_client: "{{ kubernetes_certificates_dir }}/etcd-client.pem"
