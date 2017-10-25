@@ -272,7 +272,6 @@ const defaultRuleSet = `---
   - ["master", "worker", "ingress", "storage"]
   - ["ubuntu"]
   packageName: nfs-common
-  anyVersion: true
 - kind: PackageDependency
   when: 
   - ["master", "worker", "ingress", "storage"]
@@ -285,28 +284,24 @@ const defaultRuleSet = `---
   - ["etcd", "master", "worker", "ingress", "storage"]
   - ["ubuntu"]
   packageName: docker
-  anyVersion: true
   shouldNotBeInstalled: true
 - kind: PackageDependency
   when: 
   - ["etcd", "master", "worker", "ingress", "storage"]
   - ["ubuntu"]
   packageName: docker-engine
-  anyVersion: true
   shouldNotBeInstalled: true
 - kind: PackageDependency
   when: 
   - ["etcd", "master", "worker", "ingress", "storage"]
   - ["ubuntu"]
   packageName: docker-ce
-  anyVersion: true
   shouldNotBeInstalled: true
 - kind: PackageDependency
   when: 
   - ["etcd", "master", "worker", "ingress", "storage"]
   - ["ubuntu"]
   packageName: docker-ee
-  anyVersion: true
   shouldNotBeInstalled: true
 
 - kind: PackageDependency
@@ -326,7 +321,6 @@ const defaultRuleSet = `---
   - ["master", "worker", "ingress", "storage"]
   - ["centos"]
   packageName: nfs-utils
-  anyVersion: true
 - kind: PackageDependency
   when: 
   - ["master", "worker", "ingress", "storage"]
@@ -339,49 +333,42 @@ const defaultRuleSet = `---
   - ["etcd", "master", "worker", "ingress", "storage"]
   - ["centos"]
   packageName: docker
-  anyVersion: true
   shouldNotBeInstalled: true
 - kind: PackageDependency
   when: 
   - ["etcd", "master", "worker", "ingress", "storage"]
   - ["centos"]
   packageName: docker-common
-  anyVersion: true
   shouldNotBeInstalled: true
 - kind: PackageDependency
   when: 
   - ["etcd", "master", "worker", "ingress", "storage"]
   - ["centos"]
   packageName: docker-selinux
-  anyVersion: true
   shouldNotBeInstalled: true
 - kind: PackageDependency
   when: 
   - ["etcd", "master", "worker", "ingress", "storage"]
   - ["centos"]
   packageName: docker-engine-selinux
-  anyVersion: true
   shouldNotBeInstalled: true
 - kind: PackageDependency
   when: 
   - ["etcd", "master", "worker", "ingress", "storage"]
   - ["centos"]
   packageName: docker-engine
-  anyVersion: true
   shouldNotBeInstalled: true
 - kind: PackageDependency
   when: 
   - ["etcd", "master", "worker", "ingress", "storage"]
   - ["centos"]
   packageName: docker-ce
-  anyVersion: true
   shouldNotBeInstalled: true
 - kind: PackageDependency
   when: 
   - ["etcd", "master", "worker", "ingress", "storage"]
   - ["centos"]
   packageName: docker-ee
-  anyVersion: true
   shouldNotBeInstalled: true
 
 - kind: PackageDependency
@@ -401,7 +388,6 @@ const defaultRuleSet = `---
   - [master", "worker", "ingress", "storage"]
   - ["rhel"]
   packageName: nfs-utils
-  anyVersion: true
 - kind: PackageDependency
   when: 
   - ["master", "worker", "ingress", "storage"]
@@ -414,49 +400,42 @@ const defaultRuleSet = `---
   - ["etcd", "master", "worker", "ingress", "storage"]
   - ["rhel"]
   packageName: docker
-  anyVersion: true
   shouldNotBeInstalled: true
 - kind: PackageDependency
   when: 
   - ["etcd", "master", "worker", "ingress", "storage"]
   - ["rhel"]
   packageName: docker-common
-  anyVersion: true
   shouldNotBeInstalled: true
 - kind: PackageDependency
   when: 
   - ["etcd", "master", "worker", "ingress", "storage"]
   - ["rhel"]
   packageName: docker-selinux
-  anyVersion: true
   shouldNotBeInstalled: true
 - kind: PackageDependency
   when: 
   - ["etcd", "master", "worker", "ingress", "storage"]
   - ["rhel"]
   packageName: docker-engine-selinux
-  anyVersion: true
   shouldNotBeInstalled: true
 - kind: PackageDependency
   when: 
   - ["etcd", "master", "worker", "ingress", "storage"]
   - ["rhel"]
   packageName: docker-engine
-  anyVersion: true
   shouldNotBeInstalled: true
 - kind: PackageDependency
   when: 
   - ["etcd", "master", "worker", "ingress", "storage"]
   - ["rhel"]
   packageName: docker-ce
-  anyVersion: true
   shouldNotBeInstalled: true
 - kind: PackageDependency
   when: 
   - ["etcd", "master", "worker", "ingress", "storage"]
   - ["rhel"]
   packageName: docker-ee
-  anyVersion: true
   shouldNotBeInstalled: true
 
 # Gluster packages
@@ -502,7 +481,6 @@ const upgradeRuleSet = `---
   - ["master", "worker", "ingress", "storage"]
   - ["ubuntu"]
   packageName: nfs-common
-  anyVersion: true
 - kind: PackageDependency
   when: 
   - ["master", "worker", "ingress", "storage"]
@@ -527,7 +505,6 @@ const upgradeRuleSet = `---
   - ["master", "worker", "ingress, storage"]
   - ["centos"]
   packageName: nfs-utils
-  anyVersion: true
 - kind: PackageDependency
   when: 
   - ["master", "worker", "ingress, storage"]
@@ -552,7 +529,6 @@ const upgradeRuleSet = `---
   - ["master", "worker", "ingress, storage"]
   - ["rhel"]
   packageName: nfs-utils
-  anyVersion: true
 - kind: PackageDependency
   when: 
   - ["master", "worker", "ingress, storage"]
