@@ -9,6 +9,9 @@ jobs:
     <<: *defaults
     steps:
       - checkout
+      - run: 
+          name: Install unzip
+          command: cat /etc/apt/sources.list
       - run:
           name: Unit tests
           command: make bare-test
