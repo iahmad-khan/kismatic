@@ -105,11 +105,13 @@ func Provision(in io.Reader, out io.Writer, opts *provisionOpts) error {
 
 //Destroy destroys a provisioned cluster (using --force by default)
 func Destroy(in io.Reader, out io.Writer, opts *destroyOpts) error {
+	os.Chdir("terraform/clusters/dev/")
 	tfDestroy := exec.Command(terraform, "destroy", "-force")
 	if stdoutStderr, err := tfDestroy.CombinedOutput(); err != nil {
 		return fmt.Errorf("Error attempting to destroy: %s", stdoutStderr)
 	}
 	fmt.Fprintf(out, "Cluster destruction successful.\n")
+	os.Chdir("../../../")
 	return nil
 }
 
