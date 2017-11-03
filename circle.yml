@@ -2,16 +2,13 @@ version: 2
 defaults: &defaults
   working_directory: /go/src/github.com/apprenda/kismatic
   docker:
-    - image: golang:1.8
+    - image: circleci/golang:1.8.4
 
 jobs:
   build:
     <<: *defaults
     steps:
       - checkout
-      - run: 
-          name: Install unzip
-          command: cat /etc/apt/sources.list
       - run:
           name: Unit tests
           command: make bare-test
