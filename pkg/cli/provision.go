@@ -1,6 +1,10 @@
 package cli
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -8,6 +12,7 @@ import (
 	"os/exec"
 
 	"github.com/spf13/cobra"
+	cryptoSSH "golang.org/x/crypto/ssh"
 )
 
 const terraform string = "./../../bin/terraform"
@@ -116,6 +121,30 @@ func getTfPlan(clusterName string) string {
 	return fmt.Sprintf("-state=terraform/clusters/%s/kismatic-cluster", clusterName)
 }
 
-func generateSSHKey() (string, error) {
-	return "", nil
+// MakeSSHKeyPair make a pair of public and private keys for SSH access.
+// Public key is encoded in the format for inclusion in an OpenSSH authorized_keys file.
+// Private Key generated is PEM encoded
+func MakeSSHKeyPair(pubKeyPath, privateKeyPath string) error {
+	privateKey, err := rsa.GenerateKey(rand.Reader, 4096)
+	if err != nil {
+		return err
+	}
+
+	// generate and write private key as PEM
+	privateKeyFile, err := os.Create(privateKeyPath)
+	defer privateKeyFile.Close()
+	if err != nil {
+		return err
+	}
+	privateKeyPEM := &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(privateKey)}
+	if err := pem.Encode(privateKeyFile, privateKeyPEM); err != nil {
+		return err
+	}
+
+	// generate and write public key
+	pub, err := cryptoSSH.NewPublicKey(&privateKey.PublicKey)
+	if err != nil {
+		return err
+	}
+	return ioutil.WriteFile(pubKeyPath, cryptoSSH.MarshalAuthorizedKey(pub), 0644)
 }

@@ -23,8 +23,11 @@ variable "access_key" {
 variable "secret_key" {
   default = ""
 }
+variable "private_ssh_key_path" {
+  default = ""
+}
 
-variable "ssh_key" {
+variable "public_ssh_key" {
   description = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQD3F6tyPEFEzV0LX3X8BsXdMsQz1x2cEikKDEY0aIj41qgxMCP/iteneqXSIFZBp5vizPvaoIR3Um9xK7PGoW8giupGn+EPuxIA4cDM4vzOqOkiMPhz5XK0whEjkVzTo4+S0puvDZuwIsdiW9mxhJc7tgBNL0cYlWSYVkz4G/fslNfRPW5mYAM49f4fhtxPb5ok4Q2Lg9dPKVHO/Bgeu5woMc7RY0p1ej6D4CKFE6lymSDJpW0YHX/wqE9+cfEauh7xZcG0q9t2ta6F6fmX0agvpFyZo8aFbXeUBr7osSCJNgvavWbM/06niWrOvYX2xwWdhXmXSrbX8ZbabVohBK41 email@example.com"
   #As an example.
   /*
@@ -50,7 +53,7 @@ variable "ubuntu-os" {
 }
 
 variable "instance_size" {
-  default = "t2.nano"
+  default = "t2.medium"
   #This too.
   #Recommend at least a t2.medium
 }

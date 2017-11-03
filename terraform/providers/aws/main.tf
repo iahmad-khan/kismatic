@@ -26,11 +26,28 @@ data "aws_ami" "ubuntu" {
 }
 
 resource "aws_key_pair" "kismatic" {
-  key_name   = "kismatic-key"
-  public_key = "${var.ssh_key}"
+  key_name   = "${var.cluster_name}"
+  public_key = "${var.public_ssh_key}"
+}
+
+resource "aws_security_group" "ssh" {
+  name        = "kismatic-ssh"
+  description = "Allow inbound ssh traffic"
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags {
+    Name = "allow_ssh"
+  }
 }
 
 resource "aws_instance" "master" {
+  key_name      = "${var.cluster_name}"
   count         = "${var.master_count}"
   ami           = "${data.aws_ami.ubuntu.id}"
   instance_type = "${var.instance_size}"
@@ -40,6 +57,7 @@ resource "aws_instance" "master" {
 }
 
 resource "aws_instance" "etcd" {
+  key_name      = "${var.cluster_name}"
   count         = "${var.etcd_count}"
   ami           = "${data.aws_ami.ubuntu.id}"
   instance_type = "${var.instance_size}"
@@ -49,6 +67,7 @@ resource "aws_instance" "etcd" {
 }
 
 resource "aws_instance" "worker" {
+  key_name      = "${var.cluster_name}"
   count         = "${var.worker_count}"
   ami           = "${data.aws_ami.ubuntu.id}"
   instance_type = "${var.instance_size}"
@@ -58,6 +77,7 @@ resource "aws_instance" "worker" {
 }
 
 resource "aws_instance" "ingress" {
+  key_name      = "${var.cluster_name}"
   count         = "${var.ingress_count}"
   ami           = "${data.aws_ami.ubuntu.id}"
   instance_type = "${var.instance_size}"
@@ -67,6 +87,7 @@ resource "aws_instance" "ingress" {
 }
 
 resource "aws_instance" "storage" {
+  key_name      = "${var.cluster_name}"
   count         = "${var.storage_count}"
   ami           = "${data.aws_ami.ubuntu.id}"
   instance_type = "${var.instance_size}"
@@ -77,13 +98,13 @@ resource "aws_instance" "storage" {
 
 
 data "template_file" "kismatic_cluster" {
-  template = "${file("${path.module}/../../clusters/dev/${var.cluster_name}.yaml.tpl")}"
+  template = "${file("${path.module}/../../clusters/dev/kismatic-cluster.yaml.tpl")}"
   vars {
     etcd_ip = "${aws_instance.etcd.0.public_ip}"
     master_ip = "${aws_instance.master.0.public_ip}"
     worker_ip = "${aws_instance.worker.0.public_ip}"
     ingress_ip = "${aws_instance.ingress.0.public_ip}"
-    ssh_key = "${vars.ssh_key}"
+    ssh_key = "${var.private_ssh_key_path}"
   }
 }
 
