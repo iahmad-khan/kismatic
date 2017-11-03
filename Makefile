@@ -122,10 +122,14 @@ vendor-ansible/out:
 	rm vendor-ansible/out/ansible.tar.gz
 
 vendor-terraform/out:
-	mkdir -p vendor-terraform/out/$(GOOS)
-	curl -L https://releases.hashicorp.com/terraform/$(TERRAFORM_VERSION)/terraform_$(TERRAFORM_VERSION)_$(GOOS)_amd64.zip -o vendor-terraform/out/$(GOOS)/tmp.zip
-	unzip vendor-terraform/out/$(GOOS)/tmp.zip -d vendor-terraform/out/$(GOOS)/
-	rm vendor-terraform/out/$(GOOS)/tmp.zip
+	mkdir -p vendor-terraform/out/darwin
+	mkdir -p vendor-terraform/out/linux
+	curl -L https://releases.hashicorp.com/terraform/$(TERRAFORM_VERSION)/terraform_$(TERRAFORM_VERSION)_darwin_amd64.zip -o vendor-terraform/out/darwin/tmp.zip
+	unzip vendor-terraform/out/darwin/tmp.zip -d vendor-terraform/out/darwin/
+	curl -L https://releases.hashicorp.com/terraform/$(TERRAFORM_VERSION)/terraform_$(TERRAFORM_VERSION)_linux_amd64.zip -o vendor-terraform/out/linux/tmp.zip
+	unzip vendor-terraform/out/linux/tmp.zip -d vendor-terraform/out/linux/
+	rm vendor-terraform/out/darwin/tmp.zip
+	rm vendor-terraform/out/linux/tmp.zip
 
 vendor-kuberang/$(KUBERANG_VERSION):
 	mkdir -p vendor-kuberang/$(KUBERANG_VERSION)
