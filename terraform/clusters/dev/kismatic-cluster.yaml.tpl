@@ -48,7 +48,7 @@ cluster:
   ssh:
 
     # This user must be able to sudo without password.
-    user: root
+    user: ubuntu
 
     # Absolute path to the ssh private key we should use to manage nodes.
     ssh_key: ${ssh_key}
@@ -178,7 +178,7 @@ etcd:
   # traffic, provide it in the internalip field. Otherwise, that field can be
   # left blank.
   nodes:
-  - host: etcd1
+  - host: ${etcd_host}
     ip: ${etcd_ip}
 
 # Master nodes are the ones that run the Kubernetes control plane components.
@@ -193,21 +193,21 @@ master:
   # Otherwise, use the IP address of a single master node.
   load_balanced_short_name: ${master_ip}
   nodes:
-  - host: master1
+  - host: ${master_host}
     ip: ${master_ip}
 
 # Worker nodes are the ones that will run your workloads on the cluster.
 worker:
   expected_count: 1
   nodes:
-  - host: worker1
+  - host: ${worker_host}
     ip: ${worker_ip}
 
 # Ingress nodes will run the ingress controllers.
 ingress:
   expected_count: 1
   nodes: 
-  - host: ingress1
+  - host: ${ingress_host}
     ip: ${ingress_ip}
 
 # Storage nodes will be used to create a distributed storage cluster that can
