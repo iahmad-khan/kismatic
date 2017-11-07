@@ -30,23 +30,23 @@ resource "aws_key_pair" "kismatic" {
   public_key = "${var.public_ssh_key}"
 }
 
-resource "aws_vpc" "kismatic" {
-  cidr_block            = "10.0.0.0/16"
-  enable_dns_support    = true
-  enable_dns_hostnames  = true
-  tags {
-    Name = "kismatic"
-  }
-}
+# resource "aws_vpc" "kismatic" {
+#   cidr_block            = "10.0.0.0/16"
+#   enable_dns_support    = true
+#   enable_dns_hostnames  = true
+#   tags {
+#     Name = "kismatic"
+#   }
+# }
 
-resource "aws_security_group" "sec_group" {
+resource "aws_security_group" "kismatic_sec_group" {
   name        = "kismatic - cluster"
   description = "Allow inbound SSH and ICMP traffic for kismatic"
-  vpc_id      = "${aws_vpc.kismatic.id}"
+  # vpc_id      = "${aws_vpc.kismatic.id}"
 
   ingress {
-    from_port   = 22
-    to_port     = 22
+    from_port   = 0
+    to_port     = 10255
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -71,7 +71,7 @@ resource "aws_security_group" "sec_group" {
 }
 
 resource "aws_instance" "master" {
-  vpc_security_group_ids = ["${aws_vpc.kismatic.id}"]
+  security_groups = ["${aws_security_group.kismatic_sec_group.name}"]
   key_name        = "${var.cluster_name}"
   count           = "${var.master_count}"
   ami             = "${data.aws_ami.ubuntu.id}"
@@ -82,7 +82,7 @@ resource "aws_instance" "master" {
 }
 
 resource "aws_instance" "etcd" {
-  vpc_security_group_ids = ["${aws_vpc.kismatic.id}"]
+  security_groups = ["${aws_security_group.kismatic_sec_group.name}"]
   key_name        = "${var.cluster_name}"
   count           = "${var.etcd_count}"
   ami             = "${data.aws_ami.ubuntu.id}"
@@ -93,7 +93,7 @@ resource "aws_instance" "etcd" {
 }
 
 resource "aws_instance" "worker" {
-  vpc_security_group_ids = ["${aws_vpc.kismatic.id}"]
+  security_groups = ["${aws_security_group.kismatic_sec_group.name}"]
   key_name        = "${var.cluster_name}"
   count           = "${var.worker_count}"
   ami             = "${data.aws_ami.ubuntu.id}"
@@ -104,7 +104,7 @@ resource "aws_instance" "worker" {
 }
 
 resource "aws_instance" "ingress" {
-  vpc_security_group_ids = ["${aws_vpc.kismatic.id}"]
+  security_groups = ["${aws_security_group.kismatic_sec_group.name}"]
   key_name        = "${var.cluster_name}"
   count           = "${var.ingress_count}"
   ami             = "${data.aws_ami.ubuntu.id}"
@@ -115,7 +115,7 @@ resource "aws_instance" "ingress" {
 }
 
 resource "aws_instance" "storage" {
-  vpc_security_group_ids = ["${aws_vpc.kismatic.id}"]
+  security_groups = ["${aws_security_group.kismatic_sec_group.name}"]
   key_name        = "${var.cluster_name}"
   count           = "${var.storage_count}"
   ami             = "${data.aws_ami.ubuntu.id}"
