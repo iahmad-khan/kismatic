@@ -10,8 +10,8 @@ jobs:
     steps:
       - checkout
       - run: 
-        name: Install unzip
-        command: apt update && apt install unzip
+          name: Install unzip
+          command: apt update && apt install unzip
       - run:
           name: Unit tests
           command: make bare-test
