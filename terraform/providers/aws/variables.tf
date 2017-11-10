@@ -47,7 +47,7 @@ variable "cluster_name" {
   default = "kismatic-cluster"
 }
 
-variable "ubuntu-os" {
+variable "ami" {
   default = "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-*"
   #This might be a pain to do extensibly.
 }
@@ -84,5 +84,5 @@ variable ingress_count {
 
 variable storage_count {
   description = "Number of k8s storage nodes"
-  default     = 0
+  default     = 1
 }

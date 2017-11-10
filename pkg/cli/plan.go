@@ -29,11 +29,19 @@ func NewCmdPlan(in io.Reader, out io.Writer, options *installOpts) *cobra.Comman
 func doPlan(in io.Reader, out io.Writer, planner install.Planner, planFile string) error {
 	fmt.Fprintln(out, "Plan your Kubernetes cluster:")
 
-	provisioner, err := util.PromptForString(in, out, "Infrastructure provisioner (optional, leave blank if nodes are already provisioned)", "", install.InfrastructureProvisioners())
+	provisioner, err := util.PromptForString(in, out, "Infrastructure provider (optional, leave blank if nodes are already provisioned)", "", install.InfrastructureProviders())
 	if err != nil {
 		return fmt.Errorf("Error setting infrastructure provisioner: %v", err)
 	}
 
+	//This is provider specific, otherwise != "" would be fine.
+	if provisioner == "aws" {
+		fmt.Fprintln(out, "Please make sure you have AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_DEFAULT_REGION environment variables set. The provisioning phase will fail if they are not.")
+	}
+	name, err := util.PromptForString(in, out, "Cluster name", "kismatic-cluster", install.InfrastructureProviders())
+	if err != nil {
+		return fmt.Errorf("Error setting infrastructure provisioner: %v", err)
+	}
 	etcdNodes, err := util.PromptForInt(in, out, "Number of etcd nodes", 3)
 	if err != nil {
 		return fmt.Errorf("Error reading number of etcd nodes: %v", err)

@@ -26,6 +26,7 @@ const (
 // PlanTemplateOptions contains the options that are desired when generating
 // a plan file template.
 type PlanTemplateOptions struct {
+	ClusterName               string
 	InfrastructureProvisioner string
 	EtcdNodes                 int
 	MasterNodes               int
@@ -275,14 +276,17 @@ func buildPlanFromTemplateOptions(templateOpts PlanTemplateOptions) Plan {
 		Provider: templateOpts.InfrastructureProvisioner,
 	}
 	// set provisioner's provider specific options
+	if templateOpts.InfrastructureProvisioner != "" {
+
+	}
 	switch templateOpts.InfrastructureProvisioner {
 	case "aws":
-		provisioner.AWSOptions = &AWSProvisionerOptions{}
+		provisioner.AWSOptions = &AWSProviderOptions{}
 	}
 
 	p.Provisioner = provisioner
 
-	p.Cluster.Name = "kubernetes"
+	p.Cluster.Name = "kismatic-cluster"
 	p.Cluster.AdminPassword = templateOpts.AdminPassword
 	p.Cluster.DisablePackageInstallation = false
 	p.Cluster.DisconnectedInstallation = false

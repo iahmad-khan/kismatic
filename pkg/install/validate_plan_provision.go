@@ -2,10 +2,29 @@ package install
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 
 	"github.com/apprenda/kismatic/pkg/util"
 )
+
+//Every single possible EC2 instance type.
+const EC2Regexp string = `((t2.(nano|micro|small|medium|(|x|2x)large))|
+							(m4.((|x|2x|4x|10x|16x)large))|
+							(m3.(medium|(|x|2x)large))|
+							(c5.((|x|2x|4x|9x|18x)large))|
+							(c4.((|x|2x|4x|8x)large))|
+							(c3.((|x|2x|4x|8x)large))|
+							(x1.(16|32)xlarge)|
+							(x1e.32xlarge)|
+							(r4.(|x|2x|4x|8x|16x)large)|
+							(r3.((|x|2x|4x|8x)large))|
+							(p3.(2|8|16)xlarge)|
+							(p2.(x|8x|16x)large)|
+							(g3.(4|8|16)xlarge)|
+							(f1.16xlarge)|
+							(i3.(|x|2x|4x|8x|16x)large)|
+							(d2.(|2|4|8)xlarge))`
 
 // ValidatePlanForProvisioner runs validation against the installation plan.
 // It is similar to ValidatePlan but for a smaller set of rules that are critical to provisioning infrastructure.
@@ -44,13 +63,37 @@ func (p *Provisioner) validate() (bool, []error) {
 		v.addError(fmt.Errorf("Provisioner provider cannot be empty"))
 		return v.valid()
 	}
-	if !util.Contains(p.Provider, InfrastructureProvisioners()) {
-		v.addError(fmt.Errorf("%q is not a valid provisioner provider. Options are %v", p.Provider, InfrastructureProvisioners()))
+	if !util.Contains(p.Provider, InfrastructureProviders()) {
+		v.addError(fmt.Errorf("%q is not a valid provisioner provider. Options are %v", p.Provider, InfrastructureProviders()))
 	}
-	// TODO run any validation required
-	// Would also be a good time to check for the ENV vars
 	if p.Provider != "" {
+		switch p.Provider {
+		case "aws":
+			if aws := os.Getenv("AWS_ACCESS_KEY_ID"); aws == "" || p.AWSOptions.AccessKey == "" {
+				v.addError(fmt.Errorf("AWS_ACCESS_KEY_ID not found"))
+			}
+			if aws := os.Getenv("AWS_SECRET_ACCESS_KEY"); aws == "" || p.AWSOptions.SecretKey == "" {
+				v.addError(fmt.Errorf("AWS_SECRET_ACCESS_KEY not found"))
+			}
+			if aws := os.Getenv("AWS_DEFAULT_REGION"); aws == "" || p.AWSOptions.Region == "" {
+				v.addError(fmt.Errorf("AWS_DEFAULT_REGION not found"))
+			}
+			if p.AWSOptions.PrivateSSHKeyPath == "" {
+				v.addError(fmt.Errorf("SSH private key path must be set to properly use kismatic"))
+			}
+			if p.AWSOptions.PublicSSHKey == "" {
+				v.addError(fmt.Errorf("SSH public key must be set to properly use kismatic"))
+			}
 
+			validEC2Type, err := regexp.MatchString(EC2Regexp, p.AWSOptions.AMI)
+			if err != nil {
+				v.addError(fmt.Errorf("Could not determine if %q is an EC2 instance type: %v", p.AWSOptions.AMI, err))
+			}
+			if !validEC2Type {
+				v.addError(fmt.Errorf("%q is not a valid EC2 instance", p.AWSOptions.AMI))
+			}
+			//TODO add the rest of the validation for AWS
+		}
 	}
 	return v.valid()
 }
@@ -122,29 +165,32 @@ func (ong *provisionerOptionalNodeGroup) validate() (bool, []error) {
 
 func (n *provisionerNode) validate() (bool, []error) {
 	v := newValidator()
-	// Hostnames need to be templates ${hostname_#}
-	template, err := regexp.MatchString(`\${host_\d+}`, n.Host)
+	hostPattern := `\${(master|etcd|worker|ingress|storage)_host_\d+}`
+	pubIPPattern := `\${(master|etcd|worker|ingress|storage)_pub_ip_\d+}`
+	privIPPattern := `\${(master|etcd|worker|ingress|storage)_priv_ip_\d+}`
+	// Hostnames need to be templates ${(master|etcd|worker|ingress|storage)_host_#}
+	template, err := regexp.MatchString(hostPattern, n.Host)
 	if err != nil {
 		v.addError(fmt.Errorf("Could not determine if %q is a templated value: %v", n.Host, err))
 	}
 	if !template {
-		v.addError(fmt.Errorf("%q is not a valid IP templated string, should be '${host_#}'", n.IP))
+		v.addError(fmt.Errorf("%q is not a valid IP templated string, should be '%s'", n.IP, hostPattern))
 	}
-	// IPs need to be templates ${ip_#}
-	template, err = regexp.MatchString(`\${ip_\d+}`, n.IP)
+	// IPs need to be templates ${(master|etcd|worker|ingress|storage)_pub_ip_#}
+	template, err = regexp.MatchString(pubIPPattern, n.IP)
 	if err != nil {
 		v.addError(fmt.Errorf("Could not determine if %q is a templated value: %v", n.IP, err))
 	}
 	if !template {
-		v.addError(fmt.Errorf("%q is not a valid IP templated string, should be '${ip_#}'", n.IP))
+		v.addError(fmt.Errorf("%q is not a valid IP templated string, should be '%s'", n.IP, pubIPPattern))
 	}
-	// IPs need to be templates ${internalip_#}
-	template, err = regexp.MatchString(`\${internalip_\d+}`, n.InternalIP)
+	// InternalIPs need to be templates ${(master|etcd|worker|ingress|storage)_priv_ip_#}
+	template, err = regexp.MatchString(privIPPattern, n.InternalIP)
 	if err != nil {
 		v.addError(fmt.Errorf("Could not determine if %q is a templated value: %v", n.InternalIP, err))
 	}
 	if !template && n.InternalIP != "" {
-		v.addError(fmt.Errorf("%q is not a valid InternalIP templated string, should be '${internalip_#}'", n.InternalIP))
+		v.addError(fmt.Errorf("%q is not a valid InternalIP templated string, should be '%s'", n.InternalIP, privIPPattern))
 	}
 	return v.valid()
 }

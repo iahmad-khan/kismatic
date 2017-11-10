@@ -1545,19 +1545,19 @@ var validPlanForProvisioner = Plan{
 		ExpectedCount: 3,
 		Nodes: []Node{
 			{
-				Host:       "${host_1}",
-				IP:         "${ip_1}",
-				InternalIP: "${internalip_1}",
+				Host:       "${etcd_host_1}",
+				IP:         "${etcd_pub_ip_1}",
+				InternalIP: "${etcd_priv_ip_1}",
 			},
 			{
-				Host:       "${host_2}",
-				IP:         "${ip_2}",
-				InternalIP: "${internalip_2}",
+				Host:       "${etcd_host_2}",
+				IP:         "${etcd_pub_ip_2}",
+				InternalIP: "${etcd_priv_ip_2}",
 			},
 			{
-				Host:       "${host_3}",
-				IP:         "${ip_3}",
-				InternalIP: "${internalip_3}",
+				Host:       "${etcd_host_3}",
+				IP:         "${etcd_pub_ip_3}",
+				InternalIP: "${etcd_priv_ip_3}",
 			},
 		},
 	},
@@ -1565,19 +1565,19 @@ var validPlanForProvisioner = Plan{
 		ExpectedCount: 3,
 		Nodes: []Node{
 			{
-				Host:       "${host_1}",
-				IP:         "${ip_1}",
-				InternalIP: "${internalip_1}",
+				Host:       "${master_host_1}",
+				IP:         "${master_pub_ip_1}",
+				InternalIP: "${master_priv_ip_1}",
 			},
 			{
-				Host:       "${host_2}",
-				IP:         "${ip_2}",
-				InternalIP: "${internalip_2}",
+				Host:       "${master_host_2}",
+				IP:         "${master_pub_ip_2}",
+				InternalIP: "${master_priv_ip_2}",
 			},
 			{
-				Host:       "${host_3}",
-				IP:         "${ip_3}",
-				InternalIP: "${internalip_3}",
+				Host:       "${master_host_3}",
+				IP:         "${master_pub_ip_3}",
+				InternalIP: "${master_priv_ip_3}",
 			},
 		},
 		LoadBalancedFQDN:      "${load_balanced_fqdn}",
@@ -1658,9 +1658,49 @@ func TestProvisionerNodes(t *testing.T) {
 		{
 			node: provisionerNode{
 				Node{
-					Host:       "${host_1}",
-					IP:         "${ip_1}",
-					InternalIP: "${internalip_1}",
+					Host:       "${etcd_host_1}",
+					IP:         "${etcd_pub_ip_1}",
+					InternalIP: "${etcd_priv_ip_1}",
+				},
+			},
+			valid: true,
+		},
+		{
+			node: provisionerNode{
+				Node{
+					Host:       "${master_host_1}",
+					IP:         "${master_pub_ip_1}",
+					InternalIP: "${master_priv_ip_1}",
+				},
+			},
+			valid: true,
+		},
+		{
+			node: provisionerNode{
+				Node{
+					Host:       "${worker_host_1}",
+					IP:         "${worker_pub_ip_1}",
+					InternalIP: "${worker_priv_ip_1}",
+				},
+			},
+			valid: true,
+		},
+		{
+			node: provisionerNode{
+				Node{
+					Host:       "${ingress_host_1}",
+					IP:         "${ingress_pub_ip_1}",
+					InternalIP: "${ingress_priv_ip_1}",
+				},
+			},
+			valid: true,
+		},
+		{
+			node: provisionerNode{
+				Node{
+					Host:       "${storage_host_1}",
+					IP:         "${storage_pub_ip_1}",
+					InternalIP: "${storage_priv_ip_1}",
 				},
 			},
 			valid: true,

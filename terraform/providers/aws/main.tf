@@ -14,7 +14,7 @@ data "aws_ami" "ubuntu" {
 
   filter {
     name   = "name"
-    values = ["${var.ubuntu-os}"]
+    values = ["${var.ami}"]
   }
 
   filter {
@@ -179,26 +179,26 @@ resource "aws_instance" "storage" {
 }
 
 
-data "template_file" "kismatic_cluster" {
-  template = "${file("${path.module}/../../clusters/dev/kismatic-cluster.yaml.tpl")}"
-  vars {
-    etcd_pub_ip = "${aws_instance.etcd.0.public_ip}"
-    master_pub_ip = "${aws_instance.master.0.public_ip}"
-    worker_pub_ip = "${aws_instance.worker.0.public_ip}"
-    ingress_pub_ip = "${aws_instance.ingress.0.public_ip}"
+# data "template_file" "kismatic_cluster" {
+#   template = "${file("${path.module}/../../clusters/dev/kismatic-cluster.yaml.tpl")}"
+#   vars {
+#     etcd_pub_ip = "${aws_instance.etcd.0.public_ip}"
+#     master_pub_ip = "${aws_instance.master.0.public_ip}"
+#     worker_pub_ip = "${aws_instance.worker.0.public_ip}"
+#     ingress_pub_ip = "${aws_instance.ingress.0.public_ip}"
 
-    etcd_priv_ip = "${aws_instance.etcd.0.private_ip}"
-    master_priv_ip = "${aws_instance.master.0.private_ip}"
-    worker_priv_ip = "${aws_instance.worker.0.private_ip}"
-    ingress_priv_ip = "${aws_instance.ingress.0.private_ip}"
+#     etcd_priv_ip = "${aws_instance.etcd.0.private_ip}"
+#     master_priv_ip = "${aws_instance.master.0.private_ip}"
+#     worker_priv_ip = "${aws_instance.worker.0.private_ip}"
+#     ingress_priv_ip = "${aws_instance.ingress.0.private_ip}"
        
-    etcd_host = "${aws_instance.etcd.0.private_dns}"
-    master_host = "${aws_instance.master.0.private_dns}"
-    worker_host = "${aws_instance.worker.0.private_dns}"
-    ingress_host = "${aws_instance.ingress.0.private_dns}"
+#     etcd_host = "${aws_instance.etcd.0.private_dns}"
+#     master_host = "${aws_instance.master.0.private_dns}"
+#     worker_host = "${aws_instance.worker.0.private_dns}"
+#     ingress_host = "${aws_instance.ingress.0.private_dns}"
 
-    ssh_key = "${var.private_ssh_key_path}"
-  }
-}
+#     ssh_key = "${var.private_ssh_key_path}"
+#   }
+# }
 
 

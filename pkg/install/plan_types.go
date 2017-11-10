@@ -15,8 +15,8 @@ const (
 	cniProviderCustom = "custom"
 )
 
-func InfrastructureProvisioners() []string {
-	return []string{"aws"}
+func InfrastructureProviders() []string {
+	return []string{"aws", ""}
 }
 
 func packageManagerProviders() []string {
@@ -78,15 +78,28 @@ type Plan struct {
 
 type Provisioner struct {
 	// The provider where the infrastructue will be provisioned to.
-	// The provisioner will expect provider specific ENV variables to be set.
+	// The provider will expect provider specific ENV variables to be set.
 	// Options: aws
 	Provider   string
-	AWSOptions *AWSProvisionerOptions `yaml:"options,omitempty"`
+	AWSOptions *AWSProviderOptions `yaml:"options,omitempty"`
 }
 
-// AWSProvisionerOptions contains specific options used when provisioning infrastructue
+// AWSProviderOptions contains specific options used when provisioning infrastructue
 // TODO determine what those are
-type AWSProvisionerOptions struct {
+type AWSProviderOptions struct {
+	Region            string `json:"region"`
+	AccessKey         string `json:"access_key"`
+	SecretKey         string `json:"secret_key"`
+	PrivateSSHKeyPath string `json:"private_ssh_key_path"`
+	PublicSSHKey      string `json:"public_ssh_key"`
+	ClusterName       string `json:"cluster_name"`
+	AMI               string `json:"ami"`
+	EC2InstanceType   string `json:"instance_size"`
+	MasterCount       int    `json:"master_count"`
+	EtcdCount         int    `json:"etcd_count"`
+	WorkerCount       int    `json:"worker_count"`
+	IngressCount      int    `json:"ingress_count"`
+	StorageCount      int    `json:"storage_count"`
 }
 
 // Cluster describes a Kubernetes cluster

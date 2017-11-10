@@ -1,25 +1,77 @@
-# Used for rendering the template into an actual plan.
+# Used for rendering 
 
-output "master_node_ips" {
-  value = "${join(",",aws_instance.master.*.ipv4_address)}"
+output "pub_ips" {
+  value = "${join(",",aws_instance.*.*.public_ip)}"
 }
 
-output "etcd_node_ips" {
-  value = "${join(",",aws_instance.etcd.*.ipv4_address)}"
+output "etcd_pub_ips" {
+  value = "${join(",",aws_instance.etcd.*.public_ip)}"
 }
 
-output "worker_node_ips" {
-  value = "${join(",",aws_instance.worker.*.ipv4_address)}"
+output "master_pub_ips" {
+  value = "${join(",",aws_instance.master.*.public_ip)}"
 }
 
-output "ingress_node_ips" {
-  value = "${join(",",aws_instance.ingress.*.ipv4_address)}"
+output "worker_pub_ips" {
+  value = "${join(",",aws_instance.worker.*.public_ip)}"
 }
 
-output "storage_node_ips" {
-  value = "${join(",",aws_instance.storage.*.ipv4_address)}"
+output "ingress_pub_ips" {
+  value = "${join(",",aws_instance.ingress.*.public_ip)}"
 }
 
-output "rendered_template" {
-    value = "${data.template_file.kismatic_cluster.rendered}"
+output "storage_pub_ips" {
+  value = "${join(",",aws_instance.storage.*.public_ip)}"
 }
+
+
+output "priv_ips" {
+  value = "${join(",",aws_instance.*.*.private_ip)}"
+}
+output "etcd_priv_ips" {
+  value = "${join(",",aws_instance.etcd.*.private_ip)}"
+}
+
+output "master_priv_ips" {
+  value = "${join(",",aws_instance.master.*.private_ip)}"
+}
+
+output "worker_priv_ips" {
+  value = "${join(",",aws_instance.worker.*.private_ip)}"
+}
+
+output "ingress_priv_ips" {
+  value = "${join(",",aws_instance.ingress.*.private_ip)}"
+}
+
+output "storage_priv_ips" {
+  value = "${join(",",aws_instance.storage.*.private_ip)}"
+}
+
+
+output "hosts" {
+  value = "${join(",",aws_instance.*.*.private_dns)}"
+} 
+
+output "etcd_hosts" {
+  value = "${join(",",aws_instance.etcd.*.private_dns)}"
+}
+
+output "master_hosts" {
+  value = "${join(",",aws_instance.master.*.private_dns)}"
+}
+
+output "worker_hosts" {
+  value = "${join(",",aws_instance.worker.*.private_dns)}"
+}
+
+output "ingress_hosts" {
+  value = "${join(",",aws_instance.ingress.*.private_dns)}"
+}
+
+output "storage_hosts" {
+  value = "${join(",",aws_instance.storage.*.private_dns)}"
+}
+
+
+ssh_key = "${var.private_ssh_key_path}"
