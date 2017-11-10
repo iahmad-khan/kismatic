@@ -22,7 +22,7 @@ func NewCmdProvision(in io.Reader, out io.Writer) *cobra.Command {
 	}
 
 	// Flags
-	cmd.Flags().StringVarP(&opts.PlanFileTemplateName, "template-file", "f", "kismatic-cluster.yaml.tpl", "name of the template file within the cluster (must also specify a cluster name if used)")
+	cmd.Flags().StringVarP(&opts.TemplateFileName, "template-file", "f", "kismatic-cluster.yaml.tpl", "name of the template file within the cluster (must also specify a cluster name if used)")
 	cmd.Flags().StringVarP(&opts.ClusterName, "cluster-name", "n", "kismatic-cluster", "name of the kismatic cluster to stand up. cluster names must be unique, or else provisioning will simply modified the cluster that already exists.)")
 
 	return cmd

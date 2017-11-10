@@ -13,15 +13,16 @@ import (
 const terraform string = "./../../bin/terraform"
 
 type ProvisionOpts struct {
-	ClusterName string
+	ClusterName      string
+	TemplateFileName string
 }
 
 //Provision provides a wrapper for terraform init, terraform plan, and terraform apply.
-func Provision(out io.Writer, plan *install.Plan) error {
+func Provision(out io.Writer, opts *ProvisionOpts, plan *install.Plan) error {
 
 	clusterPathFromWd := fmt.Sprintf("terraform/clusters/%s/", plan.Cluster.Name)
 	providerPathFromClusterDir := fmt.Sprintf("../../providers/%s", plan.Provisioner.Provider)
-	clustYaml := fmt.Sprintf("%.yaml", plan.Cluster.Name)
+	clustYaml := fmt.Sprintf("%s.yaml", plan.Cluster.Name)
 	os.Chdir(clusterPathFromWd)
 	tfInit := exec.Command(terraform, "init", providerPathFromClusterDir)
 	if stdoutStderr, err := tfInit.CombinedOutput(); err != nil {
@@ -45,7 +46,7 @@ func Provision(out io.Writer, plan *install.Plan) error {
 	fmt.Fprintf(out, "Provisioning successful!\n")
 	fmt.Fprintf(out, "Rendering plan file...\n")
 
-	// Render with KET
+	// Render with KET in the future
 	tfOutput := exec.Command(terraform, "output", "rendered_template")
 	stdoutStderr, err := tfOutput.CombinedOutput()
 	if err != nil {
