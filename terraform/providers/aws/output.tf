@@ -98,6 +98,3 @@ output "ingress_hosts" {
 output "storage_hosts" {
   value = "${join(",",aws_instance.storage.*.private_dns)}"
 }
-
-
-ssh_key = "${var.private_ssh_key_path}"

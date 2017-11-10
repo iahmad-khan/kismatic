@@ -84,9 +84,13 @@ type Provisioner struct {
 	AWSOptions *AWSProviderOptions `yaml:"options,omitempty"`
 }
 
-// AWSProviderOptions contains specific options used when provisioning infrastructue
-// TODO determine what those are
 type AWSProviderOptions struct {
+	Region          string `yaml:"region"`
+	AMI             string `yaml:"ami"`
+	EC2InstanceType string `yaml:"instance_size"`
+}
+
+type TerraformVariables struct {
 	Region            string `json:"region"`
 	AccessKey         string `json:"access_key"`
 	SecretKey         string `json:"secret_key"`

@@ -69,21 +69,21 @@ func (p *Provisioner) validate() (bool, []error) {
 	if p.Provider != "" {
 		switch p.Provider {
 		case "aws":
-			if aws := os.Getenv("AWS_ACCESS_KEY_ID"); aws == "" || p.AWSOptions.AccessKey == "" {
+			if aws := os.Getenv("AWS_ACCESS_KEY_ID"); aws == "" {
 				v.addError(fmt.Errorf("AWS_ACCESS_KEY_ID not found"))
 			}
-			if aws := os.Getenv("AWS_SECRET_ACCESS_KEY"); aws == "" || p.AWSOptions.SecretKey == "" {
+			if aws := os.Getenv("AWS_SECRET_ACCESS_KEY"); aws == "" {
 				v.addError(fmt.Errorf("AWS_SECRET_ACCESS_KEY not found"))
 			}
-			if aws := os.Getenv("AWS_DEFAULT_REGION"); aws == "" || p.AWSOptions.Region == "" {
+			if aws := os.Getenv("AWS_DEFAULT_REGION"); aws == "" {
 				v.addError(fmt.Errorf("AWS_DEFAULT_REGION not found"))
 			}
-			if p.AWSOptions.PrivateSSHKeyPath == "" {
-				v.addError(fmt.Errorf("SSH private key path must be set to properly use kismatic"))
-			}
-			if p.AWSOptions.PublicSSHKey == "" {
-				v.addError(fmt.Errorf("SSH public key must be set to properly use kismatic"))
-			}
+			// if p.AWSOptions.PrivateSSHKeyPath == "" {
+			// 	v.addError(fmt.Errorf("SSH private key path must be set to properly use kismatic"))
+			// }
+			// if p.AWSOptions.PublicSSHKey == "" {
+			// 	v.addError(fmt.Errorf("SSH public key must be set to properly use kismatic"))
+			// }
 
 			validEC2Type, err := regexp.MatchString(EC2Regexp, p.AWSOptions.AMI)
 			if err != nil {

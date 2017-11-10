@@ -19,14 +19,14 @@ func NewCmdPlan(in io.Reader, out io.Writer, options *installOpts) *cobra.Comman
 				return fmt.Errorf("Unexpected args: %v", args)
 			}
 			planner := &install.FilePlanner{File: options.planFilename}
-			return doPlan(in, out, planner, options.planFilename)
+			return doPlan(in, out, planner)
 		},
 	}
 
 	return cmd
 }
 
-func doPlan(in io.Reader, out io.Writer, planner install.Planner, planFile string) error {
+func doPlan(in io.Reader, out io.Writer, planner *install.FilePlanner) error {
 	fmt.Fprintln(out, "Plan your Kubernetes cluster:")
 
 	provisioner, err := util.PromptForString(in, out, "Infrastructure provider (optional, leave blank if nodes are already provisioned)", "", install.InfrastructureProviders())
@@ -36,7 +36,7 @@ func doPlan(in io.Reader, out io.Writer, planner install.Planner, planFile strin
 
 	//This is provider specific, otherwise != "" would be fine.
 	if provisioner == "aws" {
-		fmt.Fprintln(out, "Please make sure you have AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_DEFAULT_REGION environment variables set. The provisioning phase will fail if they are not.")
+		fmt.Fprintln(out, "Please make sure you have AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_DEFAULT_REGION environment variables set. The provisioner validation will fail if they are not.")
 	}
 	// name, err := util.PromptForString(in, out, "Cluster name", "kismatic-cluster", install.InfrastructureProviders())
 	// if err != nil {
@@ -113,7 +113,7 @@ func doPlan(in io.Reader, out io.Writer, planner install.Planner, planFile strin
 	if err = install.WritePlanTemplate(planTemplate, planner); err != nil {
 		return fmt.Errorf("error planning installation: %v", err)
 	}
-	fmt.Fprintf(out, "Wrote plan file template to %q\n", planFile)
+	fmt.Fprintf(out, "Wrote plan file template to %q\n", planner.File)
 	fmt.Fprintf(out, "Edit the plan file to further describe your cluster. Once ready, execute the \"install validate\" command to proceed.\n")
 	return nil
 }
