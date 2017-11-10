@@ -20,8 +20,10 @@ type ProvisionOpts struct {
 //Provision provides a wrapper for terraform init, terraform plan, and terraform apply.
 func Provision(out io.Writer, opts *ProvisionOpts, plan *install.Plan) error {
 
-	clusterPathFromWd := fmt.Sprintf("terraform/clusters/%s/", plan.Cluster.Name)
-	providerPathFromClusterDir := fmt.Sprintf("../../providers/%s", plan.Provisioner.Provider)
+	clusterPathFromWd := fmt.Sprintf("terraform/clusters/dev")
+	//%s/", plan.Cluster.Name)
+	providerPathFromClusterDir := fmt.Sprintf("../../providers/aws")
+	//%s", plan.Provisioner.Provider)
 	clustYaml := fmt.Sprintf("%s.yaml", plan.Cluster.Name)
 	os.Chdir(clusterPathFromWd)
 	tfInit := exec.Command(terraform, "init", providerPathFromClusterDir)
