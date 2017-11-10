@@ -3,6 +3,7 @@ package provision
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
 
@@ -11,11 +12,16 @@ import (
 
 const terraform string = "./../../bin/terraform"
 
+type ProvisionOpts struct {
+	ClusterName string
+}
+
 //Provision provides a wrapper for terraform init, terraform plan, and terraform apply.
 func Provision(out io.Writer, plan *install.Plan) error {
 
 	clusterPathFromWd := fmt.Sprintf("terraform/clusters/%s/", plan.Cluster.Name)
 	providerPathFromClusterDir := fmt.Sprintf("../../providers/%s", plan.Provisioner.Provider)
+	clustYaml := fmt.Sprintf("%.yaml", plan.Cluster.Name)
 	os.Chdir(clusterPathFromWd)
 	tfInit := exec.Command(terraform, "init", providerPathFromClusterDir)
 	if stdoutStderr, err := tfInit.CombinedOutput(); err != nil {
@@ -24,8 +30,7 @@ func Provision(out io.Writer, plan *install.Plan) error {
 	fmt.Fprintf(out, "Provisioner initialization successful.\n")
 
 	tfPlan := exec.Command(terraform, "plan", fmt.Sprintf("-out=%s", plan.Cluster.Name), providerPathFromClusterDir)
-	// TODO: make -out=plan.Name
-	// TODO: make target=cluster and symlink it to the provider
+
 	if stdoutStderr, err := tfPlan.CombinedOutput(); err != nil {
 		return fmt.Errorf("Error running terraform plan: %s", stdoutStderr)
 	}
@@ -41,16 +46,16 @@ func Provision(out io.Writer, plan *install.Plan) error {
 	fmt.Fprintf(out, "Rendering plan file...\n")
 
 	// Render with KET
-	// tfOutput := exec.Command(terraform, "output", "rendered_template")
-	// stdoutStderr, err := tfOutput.CombinedOutput()
-	// if err != nil {
-	// 	return fmt.Errorf("Error collecting terraform output: %s", stdoutStderr)
-	// }
+	tfOutput := exec.Command(terraform, "output", "rendered_template")
+	stdoutStderr, err := tfOutput.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("Error collecting terraform output: %s", stdoutStderr)
+	}
 
-	// if err := ioutil.WriteFile("kismatic-cluster.yaml", stdoutStderr, 0644); err != nil {
-	// 	return fmt.Errorf("Error writing rendered file to file system")
-	// }
-	// fmt.Fprintf(out, "Plan file %s rendered.\n", "kismatic-cluster.yaml")
+	if err := ioutil.WriteFile(clustYaml, stdoutStderr, 0644); err != nil {
+		return fmt.Errorf("Error writing rendered file to file system")
+	}
+	fmt.Fprintf(out, "Plan file %s rendered.\n", clustYaml)
 	os.Chdir("../../../")
 	return nil
 }
