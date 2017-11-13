@@ -50,6 +50,7 @@ func PromptForString(in io.Reader, out io.Writer, prompt string, defaultValue st
 	return ans, nil
 }
 
+// like PromptForString, but will accept any answer - instead of the ones in choices.
 func PromptForAnyString(in io.Reader, out io.Writer, prompt string, defaultValue string) (string, error) {
 	fmt.Fprintf(out, "=> %s: ", prompt)
 	s := bufio.NewScanner(in)

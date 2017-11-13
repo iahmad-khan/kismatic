@@ -262,9 +262,6 @@ func WritePlanTemplate(planTemplateOpts PlanTemplateOptions, fp FilePlanner) err
 		planTemplateOpts.AdminPassword = pw
 	}
 	p := buildPlanFromTemplateOptions(planTemplateOpts)
-	if p.Provisioner.Provider != "" {
-		fp.File = fmt.Sprintf("terraform/clusters/%s/%s.yaml.tpl", p.Cluster.Name, p.Cluster.Name)
-	}
 	if err := fp.Write(&p); err != nil {
 		return fmt.Errorf("error writing installation plan template: %v", err)
 	}
@@ -289,7 +286,7 @@ func buildPlanFromTemplateOptions(templateOpts PlanTemplateOptions) Plan {
 
 	p.Provisioner = provisioner
 
-	p.Cluster.Name = "kismatic-cluster"
+	p.Cluster.Name = templateOpts.ClusterName
 	p.Cluster.AdminPassword = templateOpts.AdminPassword
 	p.Cluster.DisablePackageInstallation = false
 	p.Cluster.DisconnectedInstallation = false
@@ -340,50 +337,25 @@ func buildPlanFromTemplateOptions(templateOpts PlanTemplateOptions) Plan {
 
 	n := Node{}
 	for i := 0; i < p.Etcd.ExpectedCount; i++ {
-		if templateOpts.InfrastructureProvisioner != "" {
-			n.Host = fmt.Sprintf("${etcd_host_%d}", i)
-			n.IP = fmt.Sprintf("${etcd_pub_ip_%d}", i)
-			n.InternalIP = fmt.Sprintf("${etcd_priv_ip_%d}", i)
-		}
 		p.Etcd.Nodes = append(p.Etcd.Nodes, n)
 	}
 
 	for i := 0; i < p.Master.ExpectedCount; i++ {
-		if templateOpts.InfrastructureProvisioner != "" {
-			n.Host = fmt.Sprintf("${master_host_%d}", i)
-			n.IP = fmt.Sprintf("${master_pub_ip_%d}", i)
-			n.InternalIP = fmt.Sprintf("${master_priv_ip_%d}", i)
-		}
 		p.Master.Nodes = append(p.Master.Nodes, n)
 	}
 
 	for i := 0; i < p.Worker.ExpectedCount; i++ {
-		if templateOpts.InfrastructureProvisioner != "" {
-			n.Host = fmt.Sprintf("${worker_host_%d}", i)
-			n.IP = fmt.Sprintf("${worker_pub_ip_%d}", i)
-			n.InternalIP = fmt.Sprintf("${worker_host_%d}", i)
-		}
 		p.Worker.Nodes = append(p.Worker.Nodes, n)
 	}
 
 	if p.Ingress.ExpectedCount > 0 {
 		for i := 0; i < p.Ingress.ExpectedCount; i++ {
-			if templateOpts.InfrastructureProvisioner != "" {
-				n.Host = fmt.Sprintf("${ingress_host_%d}", i)
-				n.IP = fmt.Sprintf("${ingress_pub_ip_%d}", i)
-				n.InternalIP = fmt.Sprintf("${ingress_priv_ip_%d}", i)
-			}
 			p.Ingress.Nodes = append(p.Ingress.Nodes, n)
 		}
 	}
 
 	if p.Storage.ExpectedCount > 0 {
 		for i := 0; i < p.Storage.ExpectedCount; i++ {
-			if templateOpts.InfrastructureProvisioner != "" {
-				n.Host = fmt.Sprintf("${storage__%d}", i)
-				n.IP = fmt.Sprintf("${storage__%d}", i)
-				n.InternalIP = fmt.Sprintf("${storage__%d}", i)
-			}
 			p.Storage.Nodes = append(p.Storage.Nodes, n)
 		}
 	}

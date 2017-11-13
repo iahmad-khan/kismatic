@@ -35,13 +35,15 @@ func doPlan(in io.Reader, out io.Writer, planner *install.FilePlanner) error {
 	}
 
 	//This is provider specific, otherwise != "" would be fine.
-	if provisioner == "aws" {
+	switch provisioner {
+	case "aws":
 		fmt.Fprintln(out, "Please make sure you have AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_DEFAULT_REGION environment variables set. The provisioner validation will fail if they are not.")
 	}
-	// name, err := util.PromptForString(in, out, "Cluster name", "kismatic-cluster", install.InfrastructureProviders())
-	// if err != nil {
-	// 	return fmt.Errorf("Error setting infrastructure provisioner: %v", err)
-	// }
+
+	name, err := util.PromptForAnyString(in, out, "Cluster name", "kismatic-cluster")
+	if err != nil {
+		return fmt.Errorf("Error setting infrastructure provisioner: %v", err)
+	}
 	etcdNodes, err := util.PromptForInt(in, out, "Number of etcd nodes", 3)
 	if err != nil {
 		return fmt.Errorf("Error reading number of etcd nodes: %v", err)
@@ -102,6 +104,7 @@ func doPlan(in io.Reader, out io.Writer, planner *install.FilePlanner) error {
 	fmt.Fprintln(out)
 
 	planTemplate := install.PlanTemplateOptions{
+		ClusterName:               name,
 		InfrastructureProvisioner: provisioner,
 		EtcdNodes:                 etcdNodes,
 		MasterNodes:               masterNodes,
