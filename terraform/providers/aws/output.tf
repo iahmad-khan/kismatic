@@ -20,26 +20,22 @@
 #   value = "${join(",",aws_instance.storage.*.ipv4_address)}"
 # }
 
-output "rendered_template" {
-    value = "${data.template_file.kismatic_cluster.rendered}"
-}
+# output "rendered_template" {
+#     value = "${data.template_file.kismatic_cluster.rendered}"
+# }
 
 # Used for rendering 
 
-output "pub_ips" {
-  value = "${join(",",aws_instance.*.*.public_ip)}"
-}
-
 output "etcd_pub_ips" {
-  value = "${join(",",aws_instance.etcd.*.public_ip)}"
+  value = ["${aws_instance.etcd.*.public_ip}"]
 }
 
 output "master_pub_ips" {
-  value = "${join(",",aws_instance.master.*.public_ip)}"
+  value = ["${aws_instance.master.*.public_ip}"]
 }
 
 output "worker_pub_ips" {
-  value = "${join(",",aws_instance.worker.*.public_ip)}"
+  value = ["${aws_instance.worker.*.public_ip}"]
 }
 
 output "ingress_pub_ips" {
@@ -50,10 +46,6 @@ output "storage_pub_ips" {
   value = "${join(",",aws_instance.storage.*.public_ip)}"
 }
 
-
-output "priv_ips" {
-  value = "${join(",",aws_instance.*.*.private_ip)}"
-}
 output "etcd_priv_ips" {
   value = "${join(",",aws_instance.etcd.*.private_ip)}"
 }
@@ -73,11 +65,6 @@ output "ingress_priv_ips" {
 output "storage_priv_ips" {
   value = "${join(",",aws_instance.storage.*.private_ip)}"
 }
-
-
-output "hosts" {
-  value = "${join(",",aws_instance.*.*.private_dns)}"
-} 
 
 output "etcd_hosts" {
   value = "${join(",",aws_instance.etcd.*.private_dns)}"

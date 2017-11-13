@@ -276,9 +276,6 @@ func buildPlanFromTemplateOptions(templateOpts PlanTemplateOptions) Plan {
 		Provider: templateOpts.InfrastructureProvisioner,
 	}
 	// set provisioner's provider specific options
-	if templateOpts.InfrastructureProvisioner != "" {
-
-	}
 	switch templateOpts.InfrastructureProvisioner {
 	case "aws":
 		provisioner.AWSOptions = &AWSProviderOptions{}

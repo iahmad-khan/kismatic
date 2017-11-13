@@ -7,10 +7,6 @@ import (
 	"os/exec"
 )
 
-type DestroyOpts struct {
-	ClusterName string
-}
-
 //Destroy destroys a provisioned cluster (using -force by default)
 func Destroy(out io.Writer, opts *DestroyOpts) error {
 	clusterPathFromWd := fmt.Sprintf("terraform/clusters/%s/", opts.ClusterName)

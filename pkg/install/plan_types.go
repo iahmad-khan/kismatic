@@ -90,22 +90,6 @@ type AWSProviderOptions struct {
 	EC2InstanceType string `yaml:"instance_size"`
 }
 
-type TerraformVariables struct {
-	Region            string `json:"region"`
-	AccessKey         string `json:"access_key"`
-	SecretKey         string `json:"secret_key"`
-	PrivateSSHKeyPath string `json:"private_ssh_key_path"`
-	PublicSSHKey      string `json:"public_ssh_key"`
-	ClusterName       string `json:"cluster_name"`
-	AMI               string `json:"ami"`
-	EC2InstanceType   string `json:"instance_size"`
-	MasterCount       int    `json:"master_count"`
-	EtcdCount         int    `json:"etcd_count"`
-	WorkerCount       int    `json:"worker_count"`
-	IngressCount      int    `json:"ingress_count"`
-	StorageCount      int    `json:"storage_count"`
-}
-
 // Cluster describes a Kubernetes cluster
 type Cluster struct {
 	// Name of the cluster to be used when generating assets that require a
