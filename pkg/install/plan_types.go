@@ -78,16 +78,17 @@ type Plan struct {
 
 type Provisioner struct {
 	// The provider where the infrastructue will be provisioned to.
-	// The provider will expect provider specific ENV variables to be set.
+	// The provisioner will expect provider specific ENV variables to be set.
 	// Options: aws
-	Provider   string
-	AWSOptions *AWSProviderOptions `yaml:"options,omitempty"`
+	Provider string
+	// AWS specific options.
+	// Only set if using "aws" provider
+	AWSOptions *AWSProvisionerOptions `yaml:"options,omitempty"`
 }
 
-type AWSProviderOptions struct {
-	Region          string `yaml:"region"`
-	AMI             string `yaml:"ami"`
-	EC2InstanceType string `yaml:"instance_size"`
+type AWSProvisionerOptions struct {
+	// Region to use for deploying infrastructure
+	Region string `yaml:"region"`
 }
 
 // Cluster describes a Kubernetes cluster

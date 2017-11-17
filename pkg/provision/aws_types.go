@@ -14,7 +14,6 @@ type AWSTerraformData struct {
 	PublicSSHKeyPath  string `json:"public_ssh_key_path"`
 	ClusterName       string `json:"cluster_name"`
 	AMI               string `json:"ami,omitempty"`
-	EC2InstanceType   string `json:"instance_size,omitempty"`
 	MasterCount       int    `json:"master_count"`
 	EtcdCount         int    `json:"etcd_count"`
 	WorkerCount       int    `json:"worker_count"`

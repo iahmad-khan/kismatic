@@ -303,7 +303,7 @@ func buildPlanFromTemplateOptions(templateOpts PlanTemplateOptions) Plan {
 	// set provisioner's provider specific options
 	switch templateOpts.InfrastructureProvisioner {
 	case "aws":
-		p.Provisioner.AWSOptions = &AWSProviderOptions{}
+		p.Provisioner.AWSOptions = &AWSProvisionerOptions{}
 	}
 
 	p.Cluster.Name = templateOpts.ClusterName

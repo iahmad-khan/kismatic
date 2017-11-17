@@ -11,7 +11,6 @@ import (
 
 	"github.com/apprenda/kismatic/pkg/install"
 	"github.com/apprenda/kismatic/pkg/ssh"
-	yaml "gopkg.in/yaml.v2"
 )
 
 func (aws AWS) getCommandEnvironment() []string {
@@ -33,9 +32,13 @@ func (aws AWS) Provision(plan install.Plan) (*install.Plan, error) {
 	cmdDir := clusterStateDir
 	providerDir := fmt.Sprintf("../../providers/%s", plan.Provisioner.Provider)
 
-	// Generate SSH keypair
-	pubKeyPath := filepath.Join(clusterStateDir, fmt.Sprintf("%s-ssh.pub", plan.Cluster.Name))
-	privKeyPath := filepath.Join(clusterStateDir, fmt.Sprintf("%s-ssh.pem", plan.Cluster.Name))
+	// Generate SSH keypair using absolute paths
+	wd, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+	pubKeyPath := filepath.Join(wd, clusterStateDir, fmt.Sprintf("%s-ssh.pub", plan.Cluster.Name))
+	privKeyPath := filepath.Join(wd, clusterStateDir, fmt.Sprintf("%s-ssh.pem", plan.Cluster.Name))
 	if err := ssh.NewKeyPair(pubKeyPath, privKeyPath); err != nil {
 		return nil, fmt.Errorf("error generating SSH key pair: %v", err)
 	}
@@ -45,7 +48,6 @@ func (aws AWS) Provision(plan install.Plan) (*install.Plan, error) {
 	data := AWSTerraformData{
 		Region:            plan.Provisioner.AWSOptions.Region,
 		ClusterName:       plan.Cluster.Name,
-		EC2InstanceType:   plan.Provisioner.AWSOptions.EC2InstanceType,
 		MasterCount:       len(plan.Master.Nodes),
 		EtcdCount:         len(plan.Etcd.Nodes),
 		WorkerCount:       len(plan.Worker.Nodes),
@@ -64,7 +66,7 @@ func (aws AWS) Provision(plan install.Plan) (*install.Plan, error) {
 	}
 
 	// Terraform init
-	initCmd := exec.Command(terraformBinaryPath, "init", providerDir)
+	initCmd := exec.Command(aws.BinaryPath, "init", providerDir)
 	initCmd.Env = cmdEnv
 	initCmd.Dir = cmdDir
 	if out, err := initCmd.CombinedOutput(); err != nil {
@@ -74,7 +76,7 @@ func (aws AWS) Provision(plan install.Plan) (*install.Plan, error) {
 	}
 
 	// Terraform plan
-	planCmd := exec.Command(terraformBinaryPath, "plan", fmt.Sprintf("-out=%s", plan.Cluster.Name), providerDir)
+	planCmd := exec.Command(aws.BinaryPath, "plan", fmt.Sprintf("-out=%s", plan.Cluster.Name), providerDir)
 	planCmd.Env = cmdEnv
 	planCmd.Dir = cmdDir
 
@@ -83,34 +85,26 @@ func (aws AWS) Provision(plan install.Plan) (*install.Plan, error) {
 	}
 
 	// Terraform apply
-	applyCmd := exec.Command(terraformBinaryPath, "apply", plan.Cluster.Name)
+	applyCmd := exec.Command(aws.BinaryPath, "apply", plan.Cluster.Name)
 	applyCmd.Env = cmdEnv
 	applyCmd.Dir = cmdDir
 	if out, err := applyCmd.CombinedOutput(); err != nil {
 		return nil, fmt.Errorf("Error running terraform apply: %s", out)
 	}
 
-	// Render template
-	outputCmd := exec.Command(terraformBinaryPath, "output", "rendered_template")
-	outputCmd.Env = cmdEnv
-	outputCmd.Dir = cmdDir
-	out, err := outputCmd.CombinedOutput()
+	provisionedPlan, err := aws.buildPopulatedPlan(plan)
 	if err != nil {
-		return nil, fmt.Errorf("Error collecting terraform output: %s", out)
+		return nil, fmt.Errorf("error getting infrastructure details from Terraform: %v", err)
 	}
-	var provisionedPlan install.Plan
-	if err := yaml.Unmarshal(out, &provisionedPlan); err != nil {
-		return nil, fmt.Errorf("error unmarshaling plan: %v", err)
-	}
-	return &provisionedPlan, nil
+	return provisionedPlan, nil
 }
 
 // updatePlan
 func (aws *AWS) buildPopulatedPlan(plan install.Plan) (*install.Plan, error) {
 	// Masters
-	tfNodes, err := aws.getTerraformNodes("master")
+	tfNodes, err := aws.getTerraformNodes(plan.Cluster.Name, "master")
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error getting master node information: %v", err)
 	}
 	mng := install.MasterNodeGroup{}
 	mng.NodeGroup = nodeGroupFromSlices(tfNodes.IPs, tfNodes.InternalIPs, tfNodes.Hosts)
@@ -119,32 +113,36 @@ func (aws *AWS) buildPopulatedPlan(plan install.Plan) (*install.Plan, error) {
 	plan.Master = mng
 
 	// Etcds
-	tfNodes, err = aws.getTerraformNodes("etcd")
+	tfNodes, err = aws.getTerraformNodes(plan.Cluster.Name, "etcd")
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error getting etcd node information: %v", err)
 	}
 	plan.Etcd = nodeGroupFromSlices(tfNodes.IPs, tfNodes.InternalIPs, tfNodes.Hosts)
 
 	// Workers
-	tfNodes, err = aws.getTerraformNodes("worker")
+	tfNodes, err = aws.getTerraformNodes(plan.Cluster.Name, "worker")
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error getting worker node information: %v", err)
 	}
 	plan.Worker = nodeGroupFromSlices(tfNodes.IPs, tfNodes.InternalIPs, tfNodes.Hosts)
 
 	// Ingress
-	tfNodes, err = aws.getTerraformNodes("ingress")
-	if err != nil {
-		return nil, err
+	if plan.Ingress.ExpectedCount > 0 {
+		tfNodes, err = aws.getTerraformNodes(plan.Cluster.Name, "ingress")
+		if err != nil {
+			return nil, fmt.Errorf("error getting ingress node information: %v", err)
+		}
+		plan.Ingress = install.OptionalNodeGroup{NodeGroup: nodeGroupFromSlices(tfNodes.IPs, tfNodes.InternalIPs, tfNodes.Hosts)}
 	}
-	plan.Ingress = install.OptionalNodeGroup{NodeGroup: nodeGroupFromSlices(tfNodes.IPs, tfNodes.InternalIPs, tfNodes.Hosts)}
 
 	// Storage
-	tfNodes, err = aws.getTerraformNodes("storage")
-	if err != nil {
-		return nil, err
+	if plan.Storage.ExpectedCount > 0 {
+		tfNodes, err = aws.getTerraformNodes(plan.Cluster.Name, "storage")
+		if err != nil {
+			return nil, fmt.Errorf("error getting storage node information: %v", err)
+		}
+		plan.Storage = install.OptionalNodeGroup{NodeGroup: nodeGroupFromSlices(tfNodes.IPs, tfNodes.InternalIPs, tfNodes.Hosts)}
 	}
-	plan.Storage = install.OptionalNodeGroup{NodeGroup: nodeGroupFromSlices(tfNodes.IPs, tfNodes.InternalIPs, tfNodes.Hosts)}
 
 	// SSH
 	plan.Cluster.SSH.User = "ubuntu"
