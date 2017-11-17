@@ -106,8 +106,11 @@ func (aws *AWS) buildPopulatedPlan(plan install.Plan) (*install.Plan, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error getting master node information: %v", err)
 	}
-	mng := install.MasterNodeGroup{}
-	mng.NodeGroup = nodeGroupFromSlices(tfNodes.IPs, tfNodes.InternalIPs, tfNodes.Hosts)
+	masterNodes := nodeGroupFromSlices(tfNodes.IPs, tfNodes.InternalIPs, tfNodes.Hosts)
+	mng := install.MasterNodeGroup{
+		ExpectedCount: masterNodes.ExpectedCount,
+		Nodes:         masterNodes.Nodes,
+	}
 	mng.LoadBalancedFQDN = tfNodes.InternalIPs[0]
 	mng.LoadBalancedShortName = tfNodes.IPs[0]
 	plan.Master = mng
@@ -132,7 +135,7 @@ func (aws *AWS) buildPopulatedPlan(plan install.Plan) (*install.Plan, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error getting ingress node information: %v", err)
 		}
-		plan.Ingress = install.OptionalNodeGroup{NodeGroup: nodeGroupFromSlices(tfNodes.IPs, tfNodes.InternalIPs, tfNodes.Hosts)}
+		plan.Ingress = install.OptionalNodeGroup(nodeGroupFromSlices(tfNodes.IPs, tfNodes.InternalIPs, tfNodes.Hosts))
 	}
 
 	// Storage
@@ -141,7 +144,7 @@ func (aws *AWS) buildPopulatedPlan(plan install.Plan) (*install.Plan, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error getting storage node information: %v", err)
 		}
-		plan.Storage = install.OptionalNodeGroup{NodeGroup: nodeGroupFromSlices(tfNodes.IPs, tfNodes.InternalIPs, tfNodes.Hosts)}
+		plan.Storage = install.OptionalNodeGroup(nodeGroupFromSlices(tfNodes.IPs, tfNodes.InternalIPs, tfNodes.Hosts))
 	}
 
 	// SSH
