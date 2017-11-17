@@ -3,7 +3,7 @@ cluster:
 
   # This password is used to login to the Kubernetes Dashboard and can also be
   # used for administration without a security certificate.
-  admin_password: password
+  admin_password: MoLhuGaPniMudcop4
 
   # Set to true if the nodes have the required packages installed.
   disable_package_installation: false
@@ -23,7 +23,7 @@ cluster:
     service_cidr_block: 172.20.0.0/16
 
     # Set to true if your nodes cannot resolve each others' names using DNS.
-    update_hosts_files: false
+    update_hosts_files: true
 
     # Set the proxy server to use for HTTP connections.
     http_proxy: ""
@@ -48,10 +48,10 @@ cluster:
   ssh:
 
     # This user must be able to sudo without password.
-    user: kismaticuser
+    user: ubuntu
 
     # Absolute path to the ssh private key we should use to manage nodes.
-    ssh_key: /root/.ssh/kismaticuser.key
+    ssh_key: ${ssh_key}
     ssh_port: 22
 
   # Override configuration of Kubernetes components.
@@ -103,8 +103,11 @@ docker:
 # all nodes on the cluster.
 docker_registry:
 
-  # IP or hostname and port for your registry.
-  server: ""
+  # IP or hostname for your registry.
+  address: ""
+
+  # Port for your registry.
+  port: 8443
 
   # Absolute path to the certificate authority that should be trusted when
   # connecting to your registry.
@@ -167,115 +170,55 @@ add_ons:
     # Options: 'helm'
     provider: helm
 
-  # The rescheduler ensures that critical add-ons remain running on the cluster.
-  rescheduler:
-    disable: false
-
 # Etcd nodes are the ones that run the etcd distributed key-value database.
 etcd:
-  expected_count: 3
+  expected_count: 1
 
   # Provide the hostname and IP of each node. If the node has an IP for internal
   # traffic, provide it in the internalip field. Otherwise, that field can be
   # left blank.
   nodes:
-  - host: ""
-    ip: ""
-    internalip: ""
-    labels: {}
-
-  - host: ""
-    ip: ""
-    internalip: ""
-    labels: {}
-
-  - host: ""
-    ip: ""
-    internalip: ""
-    labels: {}
-
+  - host: ${etcd_host}
+    ip: ${etcd_pub_ip}
+    internalip: ${etcd_priv_ip}
 # Master nodes are the ones that run the Kubernetes control plane components.
 master:
-  expected_count: 2
+  expected_count: 1
 
   # If you have set up load balancing for master nodes, enter the FQDN name here.
   # Otherwise, use the IP address of a single master node.
-  load_balanced_fqdn: ""
+  load_balanced_fqdn: ${master_priv_ip}
 
   # If you have set up load balancing for master nodes, enter the short name here.
   # Otherwise, use the IP address of a single master node.
-  load_balanced_short_name: ""
+  load_balanced_short_name: ${master_pub_ip}
   nodes:
-  - host: ""
-    ip: ""
-    internalip: ""
-    labels: {}
-
-  - host: ""
-    ip: ""
-    internalip: ""
-    labels: {}
+  - host: ${master_host}
+    ip: ${master_pub_ip}
+    internalip: ${master_priv_ip}
 
 # Worker nodes are the ones that will run your workloads on the cluster.
 worker:
-  expected_count: 3
+  expected_count: 1
   nodes:
-  - host: ""
-    ip: ""
-    internalip: ""
-    labels: {}
-
-  - host: ""
-    ip: ""
-    internalip: ""
-    labels: {}
-
-  - host: ""
-    ip: ""
-    internalip: ""
-    labels: {}
+  - host: ${worker_host}
+    ip: ${worker_pub_ip}
+    internalip: ${worker_priv_ip}
 
 # Ingress nodes will run the ingress controllers.
 ingress:
-  expected_count: 2
-  nodes:
-  - host: ""
-    ip: ""
-    internalip: ""
-    labels: {}
-
-  - host: ""
-    ip: ""
-    internalip: ""
-    labels: {}
+  expected_count: 1
+  nodes: 
+  - host: ${ingress_host}
+    ip: ${ingress_pub_ip}
+    internalip: ${ingress_priv_ip}
 
 # Storage nodes will be used to create a distributed storage cluster that can
 # be consumed by your workloads.
 storage:
-  expected_count: 2
-  nodes:
-  - host: ""
-    ip: ""
-    internalip: ""
-    labels: {}
-
-  - host: ""
-    ip: ""
-    internalip: ""
-    labels: {}
+  expected_count: 0
+  nodes: []
 
 # A set of NFS volumes for use by on-cluster persistent workloads
 nfs:
-  nfs_volume:
-
-  # The host name or ip address of an NFS server.
-  - nfs_host: ""
-    mount_path: /
-
-  # The host name or ip address of an NFS server.
-  - nfs_host: ""
-    mount_path: /
-
-  # The host name or ip address of an NFS server.
-  - nfs_host: ""
-    mount_path: /
+  nfs_volume: []

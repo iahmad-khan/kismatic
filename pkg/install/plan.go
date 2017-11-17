@@ -3,17 +3,20 @@ package install
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"math/rand"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"sync"
 
 	"github.com/apprenda/kismatic/pkg/util"
 	garbler "github.com/michaelbironneau/garbler/lib"
+	homedir "github.com/mitchellh/go-homedir"
 
 	yaml "gopkg.in/yaml.v2"
 )
@@ -52,6 +55,30 @@ type Planner interface {
 // FilePlanner is a file-based installation planner
 type FilePlanner struct {
 	File string
+}
+
+// BytesPlanner is an in memory bytes planner
+type BytesPlanner struct {
+	bytes []byte
+}
+
+// Read bytes from the struct and return a plan
+func (fp *BytesPlanner) Read() (*Plan, error) {
+	p := &Plan{}
+	if err := json.Unmarshal(fp.bytes, p); err != nil {
+		return p, fmt.Errorf("could not unmarshal plan: %v", err)
+	}
+	return p, nil
+}
+
+// Write plan to the struct bytes
+func (fp *BytesPlanner) Write(p *Plan) error {
+	bytes, err := json.Marshal(p)
+	if err != nil {
+		return fmt.Errorf("could not marshal plan: %v", err)
+	}
+	fp.bytes = bytes
+	return nil
 }
 
 // Read the plan from the file system
@@ -395,6 +422,16 @@ func generateAlphaNumericPassword() (string, error) {
 		}
 		attempts++
 	}
+}
+
+func sshKey() string {
+	key := "kismaticuser.key"
+	home, err := homedir.Dir()
+	// fallback to returning just the key
+	if err != nil {
+		return key
+	}
+	return filepath.Join(home, ".ssh", key)
 }
 
 // The comment map contains is keyed by the value that should be commented
