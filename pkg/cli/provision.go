@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"fmt"
 	"io"
 
 	"github.com/apprenda/kismatic/pkg/install"
@@ -10,37 +11,55 @@ import (
 )
 
 // NewCmdProvision creates a new provision command
-func NewCmdProvision(in io.Reader, out io.Writer) *cobra.Command {
-	opts := &provision.ProvisionOpts{}
-	plan := &install.Plan{}
+func NewCmdProvision(in io.Reader, out io.Writer, opts *installOpts) *cobra.Command {
+
 	cmd := &cobra.Command{
 		Use:   "provision",
 		Short: "provision your Kubernetes cluster",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return provision.Provision(out, opts, plan)
+			fp := &install.FilePlanner{File: opts.planFilename}
+			plan, err := fp.Read()
+			if err != nil {
+				return fmt.Errorf("unable to read plan file: %v", err)
+			}
+			tf := provision.NewTerraform(nil)
+			switch plan.Provisioner.Provider {
+			case "aws":
+				aws := provision.AWS{Terraform: *tf}
+				return aws.Provision(out, plan)
+			default:
+				return fmt.Errorf("provider %s not yet supported", plan.Provisioner.Provider)
+			}
 		},
 	}
-
-	// Flags
-	cmd.Flags().StringVarP(&opts.TemplateFileName, "template-file", "f", "kismatic-cluster.yaml.tpl", "name of the template file within the cluster (must also specify a cluster name if used)")
-	cmd.Flags().StringVarP(&opts.ClusterName, "cluster-name", "n", "kismatic-cluster", "name of the kismatic cluster to stand up. cluster names must be unique, or else provisioning will simply modified the cluster that already exists.)")
+	cmd.Flags().StringVarP(&opts.planFilename, "plan-file", "f", "kismatic-cluster", "name of the kismatic cluster to create.)")
 
 	return cmd
 }
 
 // NewCmdDestroy creates a new destroy command
-func NewCmdDestroy(in io.Reader, out io.Writer) *cobra.Command {
-	opts := &provision.DestroyOpts{}
+func NewCmdDestroy(in io.Reader, out io.Writer, opts *installOpts) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "destroy",
 		Short: "destroy your provisioned cluster",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return provision.Destroy(out, opts)
+			fp := &install.FilePlanner{File: fmt.Sprintf("terraform/clusters/%s/%s.yaml", opts.planFilename, opts.planFilename)}
+			plan, err := fp.Read()
+			if err != nil {
+				return fmt.Errorf("unable to read plan file: %v", err)
+			}
+			tf := provision.NewTerraform(nil)
+			switch plan.Provisioner.Provider {
+			case "aws:":
+				aws := provision.AWS{Terraform: *tf}
+				return aws.Destroy(out, opts.planFilename)
+			default:
+				return fmt.Errorf("provider %s not yet supported", plan.Provisioner.Provider)
+			}
+
 		},
 	}
-	//Flags
-	cmd.Flags().StringVarP(&opts.ClusterName, "cluster-name", "n", "kismatic-cluster", "name of the kismatic cluster to destroy.)")
-
+	cmd.Flags().StringVarP(&opts.planFilename, "plan-file", "f", "kismatic-cluster", "name of the kismatic cluster to destroy.)")
 	return cmd
 }

@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/apprenda/kismatic/pkg/install"
 	"github.com/apprenda/kismatic/pkg/util"
@@ -95,6 +96,7 @@ func doPlan(in io.Reader, out io.Writer, planner *install.FilePlanner) error {
 	fmt.Fprintln(out)
 	fmt.Fprintf(out, "Generating installation plan file template with: \n")
 	fmt.Fprintf(out, "- %s infrastructure provisioner\n", provisioner)
+	fmt.Fprintf(out, "- %s cluster name\n", name)
 	fmt.Fprintf(out, "- %d etcd nodes\n", etcdNodes)
 	fmt.Fprintf(out, "- %d master nodes\n", masterNodes)
 	fmt.Fprintf(out, "- %d worker nodes\n", workerNodes)
@@ -113,7 +115,16 @@ func doPlan(in io.Reader, out io.Writer, planner *install.FilePlanner) error {
 		StorageNodes:              storageNodes,
 		NFSVolumes:                nfsVolumes,
 	}
-	if err = install.WritePlanTemplate(planTemplate, planner); err != nil {
+	if provisioner != "" {
+		//If a provider is given,
+		//write to the terraform state location
+		dir := fmt.Sprintf("terraform/clusters/%s", planTemplate.ClusterName)
+		if err := os.MkdirAll(dir, 0700); err != nil {
+			return fmt.Errorf("unable to create provisioner dir: %v", err)
+		}
+		planner.File = fmt.Sprintf("%s/%s.yaml", dir, planTemplate.ClusterName)
+	}
+	if err = install.WritePlanTemplate(planTemplate, *planner); err != nil {
 		return fmt.Errorf("error planning installation: %v", err)
 	}
 	fmt.Fprintf(out, "Wrote plan file template to %q\n", planner.File)

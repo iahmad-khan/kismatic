@@ -35,7 +35,7 @@ const ec2Regexp string = `((t2.(nano|micro|small|medium|(|x|2x)large))|
 							(g3.(4|8|16)xlarge)|
 							(f1.16xlarge)|
 							(i3.(|x|2x|4x|8x|16x)large)|
-							(d2.(|2|4|8)xlarge))`
+							(d2.(|2|4|8)xlarge))|`
 
 // TODO: There is need to run validation against anything that is validatable.
 // Expose the validatable interface so that it can be consumed when
@@ -174,6 +174,12 @@ func (p *Plan) validate() (bool, []error) {
 }
 
 func (p *Provisioner) validate() (bool, []error) {
+	awsRegions := `(us-(east|west)-(1|2))|
+					((ca|eu)-central-1)|
+					(eu-west-(1|2))|
+					(ap-(north|south)east-(1|2))|
+					(ap-south-1)|
+					(sa-east-1)|`
 	v := newValidator()
 	if p.Provider == "" {
 		v.addError(fmt.Errorf("Provisioner provider cannot be empty"))
@@ -194,14 +200,7 @@ func (p *Provisioner) validate() (bool, []error) {
 			if aws := os.Getenv("AWS_DEFAULT_REGION"); aws == "" {
 				v.addError(fmt.Errorf("AWS_DEFAULT_REGION not found"))
 			}
-			// if p.AWSOptions.PrivateSSHKeyPath == "" {
-			// 	v.addError(fmt.Errorf("SSH private key path must be set to properly use kismatic"))
-			// }
-			// if p.AWSOptions.PublicSSHKey == "" {
-			// 	v.addError(fmt.Errorf("SSH public key must be set to properly use kismatic"))
-			// }
-
-			validEC2Type, err := regexp.MatchString(EC2Regexp, p.AWSOptions.AMI)
+			validEC2Type, err := regexp.MatchString(ec2Regexp, p.AWSOptions.AMI)
 			if err != nil {
 				v.addError(fmt.Errorf("Could not determine if %q is an EC2 instance type: %v", p.AWSOptions.AMI, err))
 			}
@@ -209,6 +208,13 @@ func (p *Provisioner) validate() (bool, []error) {
 				v.addError(fmt.Errorf("%q is not a valid EC2 instance", p.AWSOptions.AMI))
 			}
 			//TODO add the rest of the validation for AWS
+			validAwsRegion, err := regexp.MatchString(awsRegions, p.AWSOptions.Region)
+			if err != nil {
+				v.addError(fmt.Errorf("Could not determine if %q is an AWS region: %v", p.AWSOptions.AMI, err))
+			}
+			if !validAwsRegion {
+				v.addError(fmt.Errorf("%q is not a valid AWS region", p.AWSOptions.AMI))
+			}
 		}
 	}
 	return v.valid()
@@ -475,7 +481,7 @@ func (ong *OptionalNodeGroup) validate() (bool, []error) {
 	if len(ong.Nodes) != ong.ExpectedCount {
 		return false, []error{fmt.Errorf("Expected node count (%d) does not match the number of nodes provided (%d)", ong.ExpectedCount, len(ong.Nodes))}
 	}
-	ng := NodeGroup(*ong)
+	ng := ong.NodeGroup
 	return ng.validate()
 }
 

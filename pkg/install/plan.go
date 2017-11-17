@@ -272,16 +272,12 @@ func WritePlanTemplate(planTemplateOpts PlanTemplateOptions, fp FilePlanner) err
 // template options
 func buildPlanFromTemplateOptions(templateOpts PlanTemplateOptions) Plan {
 	p := Plan{}
-	provisioner := Provisioner{
-		Provider: templateOpts.InfrastructureProvisioner,
-	}
+	p.Provisioner.Provider = templateOpts.InfrastructureProvisioner
 	// set provisioner's provider specific options
 	switch templateOpts.InfrastructureProvisioner {
 	case "aws":
-		provisioner.AWSOptions = &AWSProviderOptions{}
+		p.Provisioner.AWSOptions = &AWSProviderOptions{}
 	}
-
-	p.Provisioner = provisioner
 
 	p.Cluster.Name = templateOpts.ClusterName
 	p.Cluster.AdminPassword = templateOpts.AdminPassword
@@ -289,8 +285,8 @@ func buildPlanFromTemplateOptions(templateOpts PlanTemplateOptions) Plan {
 	p.Cluster.DisconnectedInstallation = false
 
 	// Set SSH defaults
-	p.Cluster.SSH.User = "kismaticuser"
-	p.Cluster.SSH.Key = "kismaticuser.key"
+	p.Cluster.SSH.User = ""
+	p.Cluster.SSH.Key = ""
 	p.Cluster.SSH.Port = 22
 
 	// Set Networking defaults

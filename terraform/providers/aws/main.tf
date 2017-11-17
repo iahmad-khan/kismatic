@@ -35,14 +35,14 @@ resource "aws_vpc" "kismatic" {
   enable_dns_support    = true
   enable_dns_hostnames  = true
   tags {
-    Name = "kismatic"
+    Name = "kismatic - cluster"
   }
 }
 
 resource "aws_internet_gateway" "kismatic_gateway" {
   vpc_id = "${aws_vpc.kismatic.id}"
   tags {
-    Name = "kismatic"
+    Name = "kismatic - cluster"
   }
 }
 
@@ -55,7 +55,7 @@ resource "aws_default_route_table" "kismatic_router" {
   }
 
   tags {
-    Name = "kismatic"
+    Name = "kismatic - cluster"
   }
 }
 
